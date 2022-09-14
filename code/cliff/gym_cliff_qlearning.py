@@ -7,7 +7,7 @@ import gym
 import numpy as np
 import matplotlib.pyplot as plt
 
-from plot_utils import plot_values
+# from plotutils import plotv
 
 '''
 This code is only used as a reference
@@ -67,12 +67,12 @@ def q_learning(env, num_episodes, alpha, gamma=1.0, plot_every=100):
         
         score = 0                                             # initialize score
         state = env.reset()                                   # start episode
-        
+        state = state[0]
         eps = 1.0 / i_episode                                 # set value of epsilon (chance for exploring)
         
         while True:
             action = epsilon_greedy(Q, state, nA, eps)            # epsilon-greedy action selection
-            next_state, reward, done, info = env.step(action) # take action A, observe R, S'
+            next_state, reward, done, termination, info = env.step(action) # take action A, observe R, S'
             score += reward    
             
             Q[state][action] = update_Q_sarsamax(alpha, gamma, Q, \
