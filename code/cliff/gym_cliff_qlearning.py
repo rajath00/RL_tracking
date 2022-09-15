@@ -118,4 +118,34 @@ ax2.set_title('Estimated Q-table')
 fig2, ax3 = plt.subplots()
 plot_scores(ax3, 5000, avg_scores)
 ax3.set_title('Training profile')
-plt.show()
+#plt.show()
+
+plt.show(block=False)
+plt.pause(3)
+plt.close()
+
+max_steps = 100
+env = gym.make('CliffWalking-v0', render_mode='human')
+
+state = env.reset()
+done = False
+rewards = 0
+state = state[0]
+for s in range(max_steps):
+
+    print(f"TRAINED AGENT")
+    print("Step {}".format(s + 1))
+
+    action = np.argmax(Q_sarsamax[state])
+
+    new_state, reward, done, truncated, info = env.step(action)
+    rewards += reward
+    env.render()
+
+    print(f"score: {rewards}")
+    state = new_state
+
+    if done:
+        break
+
+env.close()
