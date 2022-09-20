@@ -8,7 +8,8 @@ from gym.envs.toy_text.utils import categorical_sample
 
 WINDOW_SIZE = (550, 350)
 
-class OwnGym(Env):
+
+class Own_gym(Env):
 
     """
     Description
@@ -39,7 +40,8 @@ class OwnGym(Env):
     (agent_row, agent_column, target_row, target_column)
 
     step`` and ``reset()`` will return an info dictionary that contains "p" and "action_mask" containing
-    the probability that the state is taken and a mask of what actions will result in a change of state to speed up training.
+    the probability that the state is taken and a mask of what actions will result in a change of state to speed up
+    training.
 
     As Taxi's initial state is a stochastic, the "p" key represents the probability of the
     transition however this value is currently bugged being 1.0, this will be fixed soon.
@@ -68,32 +70,67 @@ class OwnGym(Env):
 
     def __init__(self, render_mode: Optional[str]=None):
 
-        num_states = 2500
+        num_states = 625
         num_rows = 25
         num_cols = 25
         max_row = num_rows - 1
         max_cols = num_cols - 1
-        self.initial_state_distribution = np.zeros(num_states)
+        #self.initial_state_distribution = np.zeros(num_states)
+        #print(self.initial_state_distribution)
         num_actions = 4
         self.P = {
             state: {action: [] for action in range(num_actions)}
             for state in range(num_states)
         }
+        target_pos = 499
+        for row in range(num_states):
+            for action in range(num_actions):
+                reward = -1
+                terminated = False
+                if row == target_pos+25 and action == 0:
+                    reward = 100
+                    terminated = True
+                if row == target_pos-25 and action == 1:
+                    reward = 100
+                    terminated = True
+                if row == target_pos+1 and action == 2:
+                    reward = 100
+                    terminated = True
+                if row == target_pos-1 and action == 3:
+                    reward = 100
+                    terminated = True
+                if action == 0:
+                    if (row >= 0 and row <= 24):
+                        reward = -100
+                        new_state = row
+                    else:
+                        new_state = row-25
+                elif action == 1:
+                    if row >= 600 and row <= 624:
+                        reward = -100
+                        new_state = row
+                    else:
+                        new_state = row + 25
+                elif action == 2:
+                    if row % 25 == 0:
+                        reward = -100
+                        new_state = row
+                    else:
+                        new_state = row - 1
+                else:
+                    if row % 25 == 24:
+                        reward = -100
+                        new_state = row
+                    else:
+                        new_state = row + 1
 
-        for row in range(num_rows):
-            for col in range(num_cols):
+                self.P[row][action].append((new_state, reward, terminated))
 
-
-
-        # Reward function
-
-
-
-        self.initial_state_distribution /= self.initial_state_distribution.sum()
+        #self.initial_state_distribution /= self.initial_state_distribution.sum()
         self.action_space = spaces.Discrete(num_actions)
         self.observation_space = spaces.Discrete(num_states)
-
-        self.render_mode = render_mode
+        self.s = None
+        self.lastaction = None
 
     def encode(self):
 
@@ -106,26 +143,19 @@ class OwnGym(Env):
     def action_mask(self):
         pass
 
-
     def step(self, a):
         transitions = self.P[self.s][a]
         i = categorical_sample([t[0] for t in transitions], self.np_random)
-        p, s, r, t = transitions[i]
+        s, r, t = transitions[i]
         self.s = s
         self.lastaction = a
 
         return int(s), r, t, False
 
-    def reset(self, *, seed: Optional[int] = None, options:Optional[dict] = None):
+    def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None):
 
         super().reset(seed=seed)
-        self.s = categorical_sample(self.initial_state_distribution, self.np_random)
+        self.s = np.random.randint(0,625)
         self.lastaction = None
 
         return int(self.s)
-
-
-
-
-
-
