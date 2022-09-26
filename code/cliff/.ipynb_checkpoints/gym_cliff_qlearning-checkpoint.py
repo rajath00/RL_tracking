@@ -121,7 +121,7 @@ ax3.set_title('Training profile')
 #plt.show()
 
 plt.show(block=False)
-plt.pause(30)
+plt.pause(3)
 plt.close()
 
 max_steps = 100
