@@ -125,32 +125,35 @@ class Own_gym(Env):
                     self.P[row][action].append((new_state, reward, terminated))
 
     def target_position(self, target_pos):
-        reward = 100
-        terminated = True
+        reward = 50
+        terminated = False
 
-        transitions = self.P[target_pos+25][0]
-        i = categorical_sample([t[0] for t in transitions], self.np_random)
-        s, r, t = transitions[i]
+        for j in range(1,4):
+            if j==1:
+                terminated = True
+                reward = 100
+            transitions = self.P[target_pos + (25*j)][0]
+            i = categorical_sample([t[0] for t in transitions], self.np_random)
+            s, r, t = transitions[i]
+            self.P[target_pos + (25*j)][0] = [(s, reward, terminated)]
 
-        self.P[target_pos + 25][0].append((s,reward,terminated))
+            transitions = self.P[target_pos - (25*j)][1]
+            i = categorical_sample([t[0] for t in transitions], self.np_random)
+            s, r, t = transitions[i]
 
-        transitions = self.P[target_pos-25][1]
-        i = categorical_sample([t[0] for t in transitions], self.np_random)
-        s, r, t = transitions[i]
+            self.P[target_pos - (25*j)][1] = [(s, reward, terminated)]
 
-        self.P[target_pos - 25][1].append((s,reward,terminated))
+            transitions = self.P[target_pos + (1*j)][2]
+            i = categorical_sample([t[0] for t in transitions], self.np_random)
+            s, r, t = transitions[i]
 
-        transitions = self.P[target_pos+ 1][2]
-        i = categorical_sample([t[0] for t in transitions], self.np_random)
-        s, r, t = transitions[i]
+            self.P[target_pos + (1*j)][2] = [(s, reward, terminated)]
 
-        self.P[target_pos + 1][2].append((s,reward,terminated))
+            transitions = self.P[target_pos - (1*j)][3]
+            i = categorical_sample([t[0] for t in transitions], self.np_random)
+            s, r, t = transitions[i]
 
-        transitions = self.P[target_pos- 1][3]
-        i = categorical_sample([t[0] for t in transitions], self.np_random)
-        s, r, t = transitions[i]
-
-        self.P[target_pos - 1][3].append((s,reward,terminated))
+            self.P[target_pos - (1*j)][3] = [(s, reward, terminated)]
 
     def encode(self):
 

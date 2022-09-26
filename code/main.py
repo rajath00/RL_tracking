@@ -3,6 +3,18 @@ import gym
 import random
 from Own_gym import Own_gym
 import matplotlib.pyplot as plt
+
+
+def plot_values(ax, V):
+    # reshape the state-value function
+    V = np.reshape(V,(25,25))
+    V = np.flip(V)
+    # plot the state-value function
+    im = ax.imshow(V, cmap='cool')
+    for (j,i),label in np.ndenumerate(V):
+        ax.text(i, j, np.round(label,1), ha='center', va='center', fontsize=5)
+    ax.tick_params(bottom='off', left='off', labelbottom='off', labelleft='off')
+
 import math
 # create Taxi environment
 env = Own_gym()
@@ -19,25 +31,28 @@ epsilon = 1.0
 decay_rate = 0.005
 
 # training variables
-num_episodes = 50
-max_steps = 500 # per episode
-int_pos = 30
+num_episodes = 1000
+max_steps = 150 # per episode
+int_pos = 199
+
+# pos = int_pos
+# env.target_position(pos)
 # training
+
 for episode in range(num_episodes):
 
     state = env.reset()
     done = False
     pos = int_pos
-
     env.target_position(pos)
 
     for s in range(max_steps):
-        if s % 25 == 0:
+        if s % 20 == 0:
             pos = pos + 1
-            #print(f"{pos} is the new target position")
+            print(f"{pos} is the new target position")
             env.action_call()
             env.target_position(pos)
-        # exploration-exploitation tradeoff
+        #exploration-exploitation tradeoff
         if random.uniform(0,1) < epsilon:
             # explore
             action = env.action_space.sample()
@@ -55,17 +70,10 @@ for episode in range(num_episodes):
         # Update to our new state
         state = new_state
         if done:
+            print(episode)
             break
     epsilon = np.exp(-decay_rate * episode)
-V = []
-for i in range(625):
-    V.append(round(max(qtable[i])))
 
-V_shape = np.reshape(V,(25,25))
-print(np.shape(qtable))
-print(V_shape)
-plt.table(cellText=V_shape,rowLabels=None,colLabels=None)
-plt.show()
 print(f"Training completed over {num_episodes} episodes")
 input("Press Enter to watch trained agent...")
 
@@ -73,9 +81,8 @@ env = Own_gym()
 state = env.reset()
 done = False
 rewards = 0
-pos = 30
+pos = 199
 env.target_position(pos)
-
 for s in range(max_steps):
     if s % 25 == 0:
         pos = pos + 1
@@ -100,3 +107,8 @@ for s in range(max_steps):
         break
 
 env.close()
+Q = [np.max(qtable[x]) for x in range(625)]
+Q = np.reshape(Q,[625,1])
+fig1, ax1 = plt.subplots(figsize=(10,3))
+plot_values(ax1, Q)
+plt.show()
