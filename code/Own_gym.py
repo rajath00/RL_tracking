@@ -14,7 +14,6 @@ class Own_gym(Env):
     """
     Description
     # Boundary, the agent has to follow the Target while the target is also moving
-
      Map:
 
     +---------------------+
@@ -25,77 +24,58 @@ class Own_gym(Env):
     |                     |
     +---------------------+
 
-
     Action Space
     0 - down
     1 - up
     2 - left
     3 - right
 
-
-
     Observation Space
-    There are 50x50 discrete states where the Target may be.
+    There are 25x25 discrete states where the Target may be.
     
     Each state space is represented by the tuple:
-    (agent_row, agent_column, target_row, target_column)
+    (agent location between 0 and 625)
 
-    step`` and ``reset()`` will return an info dictionary that contains "p" and "action_mask" containing
-    the probability that the state is taken and a mask of what actions will result in a change of state to speed up
-    training.
-
-    As Taxi's initial state is a stochastic, the "p" key represents the probability of the
-    transition however this value is currently bugged being 1.0, this will be fixed soon.
-    As the steps are deterministic, "p" represents the probability of the transition which is always 1.0
-
-    For some cases, taking an action will have no effect on the state of the agent.
-    In v0.25.0, ``info["action_mask"]`` contains a np.ndarray for each of the action specifying
-    if the action will change the state.
-
-    To sample a modifying action, use ``action = env.action_space.sample(info["action_mask"])``
-    Or with a Q-value based algorithm ``action = np.argmax(q_values[obs, np.where(info["action_mask"] == 1)[0]])``.
+    step`` and ``reset()`` will return an info dictionary
 
     ### Rewards
-    - -1 per step if distance between target and agent has increased
-    - +20 for reaching target
-    - +1  per step if the distance between target and agent has decreased
+    - -1 per step
+    - +100 for reaching target
+    - -100 for going out of bounds
 
     ###Version History
     * v0: Initial version release
     """
 
-    metadata = {
-        "render_modes": ["human", "ansi", "rgb_array"],
-        "render_fps": 4,
-    }
+    # metadata = {
+    #     "render_modes": ["human", "ansi", "rgb_array"],
+    #     "render_fps": 4,
+    # }
 
     def __init__(self, render_mode: Optional[str] = None, max_step=150):
 
         self.terminated = None
-        self.num_states = 625
+        self.num_states = 625   # total no of states
         self.num_rows = 25
         self.num_cols = 25
         max_row = self.num_rows - 1
         max_cols = self.num_cols - 1
-        updated_target_pos = 30
-        # self.initial_state_distribution = np.zeros(num_states)
-        # print(self.initial_state_distribution)
+        #updated_target_pos = 30
         self.num_actions = 4
         self.P = {
             state: {action: [] for action in range(self.num_actions)}
             for state in range(self.num_states)
         }
         self.action_call()
-        # self.initial_state_distribution /= self.initial_state_distribution.sum()
         self.action_space = spaces.Discrete(self.num_actions)
         self.observation_space = spaces.Discrete(self.num_states)
         self.s = None
         self.lastaction = None
 
+    # function for getting setting rewards for all the states
     def action_call(self):
         for row in range(self.num_states):
             for action in range(self.num_actions):
-                # function for getting rewards from target position
                     reward = -1
                     terminated = False
                     if action == 0:
@@ -124,6 +104,7 @@ class Own_gym(Env):
                             new_state = row + 1
                     self.P[row][action].append((new_state, reward, terminated))
 
+    # function to set the reward func around the target
     def target_position(self, target_pos):
         reward = 50
         terminated = False
@@ -166,6 +147,7 @@ class Own_gym(Env):
     def action_mask(self):
         pass
 
+    # function to return the next state, reward and termination criteria
     def step(self, a):
         transitions = self.P[self.s][a]
         i = categorical_sample([t[0] for t in transitions], self.np_random)
@@ -175,6 +157,7 @@ class Own_gym(Env):
 
         return int(s), r, t, False
 
+    # function to reset the position
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None):
 
         super().reset(seed=seed)
