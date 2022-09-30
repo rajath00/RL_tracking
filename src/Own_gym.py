@@ -1,13 +1,20 @@
 # importing all the required libraries
-import numpy as np
-from gym import Env, spaces, utils
-import random
+# System import
 from typing import Optional
-from io import StringIO
-from os import path
+# External import
+import numpy as np
+# Specific lib used
+from gym import Env, spaces, utils
 from gym.envs.toy_text.utils import categorical_sample
 
 WINDOW_SIZE = (550, 350)
+
+# XXX
+'''
+Important in OpenAI Gym: "gym.spaces" folder, "core.py"
+How to generate P? Better idea? From occupancy map?
+How to load hyper-parameters? Use yaml (better, more readable) or json (faster)
+'''
 
 
 class Own_gym(Env):
@@ -69,8 +76,8 @@ class Own_gym(Env):
         self.action_call()
         self.action_space = spaces.Discrete(self.num_actions)
         self.observation_space = spaces.Discrete(self.num_states)
-        self.s = None
-        self.lastaction = None
+        self.state = None
+        self.last_action = None
 
     # function for getting setting rewards for all the states
     def action_call(self):
@@ -105,8 +112,8 @@ class Own_gym(Env):
                     self.P[row][action].append((new_state, reward, terminated))
 
     # function to set the reward func around the target
-    def target_position(self, target_pos):
-        reward = 50
+    def target_position(self, target_pos): # XXX what is target_pos? int or tuple? it should be tuple (x,y)
+        reward = 50 # XXX why 50
         terminated = False
 
         for j in range(1,4):
@@ -114,7 +121,7 @@ class Own_gym(Env):
                 terminated = True
                 reward = 100
             transitions = self.P[target_pos + (25*j)][0]
-            i = categorical_sample([t[0] for t in transitions], self.np_random)
+            i = categorical_sample([t[0] for t in transitions], self.np_random)  # XXX this can be changed to Pytorch function later
             s, r, t = transitions[i]
             self.P[target_pos + (25*j)][0] = [(s, reward, terminated)]
 
@@ -149,11 +156,11 @@ class Own_gym(Env):
 
     # function to return the next state, reward and termination criteria
     def step(self, a):
-        transitions = self.P[self.s][a]
+        transitions = self.P[self.state][a]
         i = categorical_sample([t[0] for t in transitions], self.np_random)
         s, r, t = transitions[i]
-        self.s = s
-        self.lastaction = a
+        self.state = s
+        self.last_action = a
 
         return int(s), r, t, False
 
@@ -161,7 +168,7 @@ class Own_gym(Env):
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None):
 
         super().reset(seed=seed)
-        self.s = np.random.randint(0, 625)
-        self.lastaction = None
+        self.state = np.random.randint(0, 625)
+        self.last_action = None
 
-        return int(self.s)
+        return int(self.state)

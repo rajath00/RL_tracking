@@ -96,7 +96,7 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D
 
-    centre1 = (30,40)
+    centre1 = (50,50)
     centre2 = (60,60)
     centre3 = (80,80)
     centres = [centre1, centre2, centre3]
@@ -115,11 +115,11 @@ if __name__ == '__main__':
     map = map1 + map2/2 + map3/3
     map = map/np.max(map)
 
-    # fig = plt.figure()
-    # ax = fig.gca(projection='3d')
-    # ax.plot_surface(X, Y, map, cmap='hot')
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    ax.plot_surface(X, Y, map, cmap='hot')
 
-    plt.imshow(map1)
+    plt.imshow(map_d)
     [plt.plot(c[0],c[1],'rx') for c in centres]
 
     plt.show()
