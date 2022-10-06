@@ -59,12 +59,12 @@ class Own_gym(Env):
     #     "render_fps": 4,
     # }
 
-    def __init__(self, render_mode: Optional[str] = None, max_step=150):
+    def __init__(self,num_rows,num_cols):
 
         self.terminated = None
         self.num_states = 625  # total no of states
-        self.num_rows = 20
-        self.num_cols = 20
+        self.num_rows = num_rows
+        self.num_cols = num_cols
         self.x_cor = 0
         self.y_cor = 0
         self.actions = {0, 1, 2, 3}
@@ -93,14 +93,14 @@ class Own_gym(Env):
         free[1:self.num_rows - 1, 1:self.num_cols - 1] = 1
 
         self.P[:, :, 0][obstacles] = -100  # reward assignment
-        self.P[:, :, 0][free] = -1  # reward assignment
+        self.P[:, :, 0][free] = -5 # reward assignment
         self.P[:, :, 1][obstacles] = 1  # termination
         self.P[:, :, 1][free] = 0  # termination
 
     # function to set the reward func around the target
     def target_position(self, new_pos):  # XXX what is target_pos? int or tuple? it should be tuple (x,y)
         reward = 50  # XXX why 50
-        extend_mask = 5
+        extend_mask = 3
         self.P[extend_mask + self.target_pos[0]:self.target_pos[0] - extend_mask, extend_mask + self.target_pos[1]:self.target_pos[1] - extend_mask, 0] = -1
         self.P[self.target_pos[0], self.target_pos[1], 1] = 0
 
@@ -149,7 +149,7 @@ class Own_gym(Env):
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None):
 
         super().reset(seed=seed)
-        init_state = np.random.randint(1,self.num_rows-2, size=(1, 2))
+        init_state = np.random.randint(1,self.num_rows-1, size=(1, 2))
         # print(init_state)
         self.state = init_state[0]
         self.last_action = None
