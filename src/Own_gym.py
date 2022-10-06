@@ -111,7 +111,7 @@ class Own_gym(Env):
                             new_state = row + 1
                     self.P[row][action].append((new_state, reward, terminated))
 
-    # function to set the reward func around the target
+    # function to set the reward func around the target.
     def target_position(self, target_pos): # XXX what is target_pos? int or tuple? it should be tuple (x,y)
         reward = 50 # XXX why 50
         terminated = False
