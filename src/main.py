@@ -34,8 +34,8 @@ decay_rate = 0.5
 target_move = False
 
 # training variables
-num_episodes = 5000
-max_steps = 500  # per episode
+num_episodes = 1000
+max_steps = 300  # per episode
 int_pos = (5,15)# define initial position of the target
 #
 if not target_move:
