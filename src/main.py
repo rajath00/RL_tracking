@@ -3,10 +3,12 @@ import random
 # External import
 import numpy as np
 import matplotlib.pyplot as plt
+from torch import optim
 # Custom import
 from Own_gym import Own_gym
 # Datatype import
 from matplotlib.axes import Axes
+
 
 
 # Function to plot the heat map for the max Q-values in each state
