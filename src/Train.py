@@ -1,4 +1,4 @@
-from torch import optim
+
 
 class Train:
 
@@ -18,3 +18,5 @@ class Train:
         loss = self.loss_fn(z, labels.float())
         loss.backward()
         self.optimizer.step()
+
+        for episode in range(num_episodes):

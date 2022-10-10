@@ -10,6 +10,9 @@ import torch.nn.functional as F
 
 # https://arxiv.org/pdf/1506.02438.pdf
 
+# https://arxiv.org/pdf/1912.02875.pdf
+
+
 class NeuralNetwork(nn.Module):
 
     def __init__(self):

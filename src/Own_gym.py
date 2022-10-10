@@ -1,15 +1,14 @@
-# importing all the required libraries
+# importing all the required libraries\
+
 # System import
 from typing import Optional
 # External import
 import numpy as np
 # Specific lib used
 from gym import Env, spaces, utils
-from gym.envs.toy_text.utils import categorical_sample
 
-WINDOW_SIZE = (550, 350)
 
-# XXX
+
 '''
 Important in OpenAI Gym: "gym.spaces" folder, "core.py"
 How to generate P? Better idea? From occupancy map?
