@@ -1,14 +1,7 @@
 # System import XXX
 import random
-
-import matplotlib.pyplot as plt
-
 # External import
 import numpy as np
-
-# Datatype import
-from matplotlib.axes import Axes
-
 # Custom import
 from replay_buffer import ReplayBuffer
 
@@ -66,12 +59,11 @@ class Train:
                 if random.uniform(0, 1) < self.epsilon:
                     # explore
                     action = self.env.action_space.sample()
-                    print(f"random action {action}")
+
                 else:
                     # exploit
                     q_values = self.model.forward((x, y))
                     action = np.argmax(q_values.detach().numpy())
-                    print(f"q-action {action}")
                 # take action and observe the reward
                 new_state, reward, done, truncated = self.env.step(action)
 
@@ -93,10 +85,6 @@ class Train:
                     done,
                 ) = self.replay_buffer.sample_buffer(self.batch_size)
 
-                # x = state[:,0]
-                # y = state[:,1]
-                # self.model.optimizer.zero_grad()
-
                 mu = self.model.forward(state)
 
                 # Q-learning algorithm
@@ -107,47 +95,20 @@ class Train:
                 # print(target_value_[0])ss
                 for j in range(self.batch_size):
 
-                    arg_max = np.argmax(target_value_[j].detach().numpy())
-                    # print(mu[j])
-                    # one_hot[j,arg_max] = 1
+                    # arg_max = np.argmax(target_value_[j].detach().numpy())
                     a = action[j]
                     target[j,a] = reward[j] + self.discount_rate * np.max(target_value_[j].detach().numpy()) * (1-done[j])
-                    # print(reward[j])
-                    # print(target[j])
 
-                # one_hot[action] = 1
-                # target = reward + (
-                #     self.discount_rate * (np.max(self.model.forward(x_new, y_new)))
-                # )
-
-                # target = target * one_hot
                 loss = self.loss_fn(mu, target)
                 self.update_network_parameters()
                 #
                 # Update to our new state
                 state = new_state
-                # if done:
-                #     break
             self.epsilon = np.exp(-self.decay_rate * episode)
 
     def update_network_parameters(self):
-        # if tau is None:
-        #     tau = self.tau
 
         model_params = self.model.named_parameters()
-        # model_target_params = self.critic.named_parameters()
-
         model_state_dict = dict(model_params)
-        # target_state_dict = dict(model_target_params)
 
         self.target_model.load_state_dict(model_state_dict)
-
-    # def train_epoch(self,input):
-    #     self.model.train()
-    #     self.optimizer.zero_grad()
-    #     z = self.model.forward(input).reshape(-1)
-    #     loss = self.loss_fn(z, labels.float())
-    #     loss.backward()
-    #     self.optimizer.step()
-    #
-    #     for episode in range(num_episodes):
