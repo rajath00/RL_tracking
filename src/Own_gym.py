@@ -91,23 +91,24 @@ class Own_gym(Env):
         free = np.zeros((self.num_rows, self.num_cols), dtype=bool)
         free[1:self.num_rows - 1, 1:self.num_cols - 1] = 1
 
-        self.P[:, :, 0][obstacles] = -100  # reward assignment
-        self.P[:, :, 0][free] = -5 # reward assignment
+        self.P[:, :, 0][obstacles] = -1 # reward assignment
+        self.P[:, :, 0][free] = -0.5 # reward assignment
         self.P[:, :, 1][obstacles] = 1  # termination
         self.P[:, :, 1][free] = 0  # termination
 
     # function to set the reward func around the target
     def target_position(self, new_pos):  # XXX what is target_pos? int or tuple? it should be tuple (x,y)
         reward = 50  # XXX why 50
-        extend_mask = 3
+        extend_mask = 1
         self.P[extend_mask + self.target_pos[0]:self.target_pos[0] - extend_mask, extend_mask + self.target_pos[1]:self.target_pos[1] - extend_mask, 0] = -1
         self.P[self.target_pos[0], self.target_pos[1], 1] = 0
 
         self.P[extend_mask + new_pos[0]:new_pos[0] - extend_mask, extend_mask + new_pos[1]:new_pos[1] - extend_mask, 0] = reward
-        self.P[new_pos[0], new_pos[1], 0] = 100
+        self.P[new_pos[0], new_pos[1], 0] = 1
         self.P[new_pos[0], new_pos[1], 1] = 1
 
         self.target_pos = new_pos
+        print(self.target_pos)
 
     def encode(self):
 

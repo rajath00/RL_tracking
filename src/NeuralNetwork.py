@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -19,12 +20,33 @@ class NeuralNetwork(nn.Module):
         super().__init__()
 
         self.fcd1 = nn.Linear(2,10)
-        self.fcd2 = nn.Linear(10,4)
+        self.fcd2 = nn.Linear(10,20)
+        self.fcd3 = nn.Linear(20,10)
+        self.fcd4 = nn.Linear(10,4)
 
-    def forward(self,x):
+    def forward(self,state):
 
-        x = self.fcd1(x)
+        x = torch.tensor(state,dtype=torch.float64)
+        x = self.fcd1(x.float())
         x = self.fcd2(F.relu(x))
-        x = F.softmax(F.relu(x))
+        x = self.fcd3(F.relu(x))
+        x = self.fcd4(F.relu(x))
 
         return x
+
+
+# class NeuralNetworkTarget(nn.Module):
+#
+#     def __init__(self):
+#             super().__init__()
+#
+#             self.fcd1 = nn.Linear(2, 10)
+#             self.fcd2 = nn.Linear(10, 4)
+#
+#     def forward(self, x, y):
+#
+#         x = torch.tensor((x, y))
+#         x = self.fcd1(x)
+#         x = self.fcd2(F.relu(x))
+#
+#         return x
