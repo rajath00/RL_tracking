@@ -61,7 +61,7 @@ class Own_gym(Env):
     def __init__(self,num_rows,num_cols):
 
         self.terminated = None
-        self.num_states = 625  # total no of states
+        self.num_states = num_rows*num_cols  # total no of states
         self.num_rows = num_rows
         self.num_cols = num_cols
         self.x_cor = 0
@@ -91,20 +91,20 @@ class Own_gym(Env):
         free = np.zeros((self.num_rows, self.num_cols), dtype=bool)
         free[1:self.num_rows - 1, 1:self.num_cols - 1] = 1
 
-        self.P[:, :, 0][obstacles] = -1 # reward assignment
+        self.P[:, :, 0][obstacles] = -5 # reward assignment
         self.P[:, :, 0][free] = -0.5 # reward assignment
         self.P[:, :, 1][obstacles] = 1  # termination
         self.P[:, :, 1][free] = 0  # termination
 
     # function to set the reward func around the target
     def target_position(self, new_pos):  # XXX what is target_pos? int or tuple? it should be tuple (x,y)
-        reward = 50  # XXX why 50
+        reward = 5  # XXX why 50
         extend_mask = 1
-        self.P[extend_mask + self.target_pos[0]:self.target_pos[0] - extend_mask, extend_mask + self.target_pos[1]:self.target_pos[1] - extend_mask, 0] = -1
-        self.P[self.target_pos[0], self.target_pos[1], 1] = 0
+        # self.P[extend_mask + self.target_pos[0]:self.target_pos[0] - extend_mask, extend_mask + self.target_pos[1]:self.target_pos[1] - extend_mask, 0] = -1
+        # self.P[self.target_pos[0], self.target_pos[1], 1] = 0
 
-        self.P[extend_mask + new_pos[0]:new_pos[0] - extend_mask, extend_mask + new_pos[1]:new_pos[1] - extend_mask, 0] = reward
-        self.P[new_pos[0], new_pos[1], 0] = 1
+        # self.P[extend_mask + new_pos[0]:new_pos[0] - extend_mask, extend_mask + new_pos[1]:new_pos[1] - extend_mask, 0] = reward
+        self.P[new_pos[0], new_pos[1], 0] = reward
         self.P[new_pos[0], new_pos[1], 1] = 1
 
         self.target_pos = new_pos
@@ -148,8 +148,10 @@ class Own_gym(Env):
     # function to reset the position
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None):
 
-        super().reset(seed=seed)
-        init_state = np.random.randint(1,self.num_rows-1, size=(1, 2))
+        # super().reset(seed=seed)
+        # init_state = np.random.randint(1,self.num_rows-1, size=(1, 2))
+
+        init_state = [(1,1)]
         # print(init_state)
         self.state = init_state[0]
         self.last_action = None

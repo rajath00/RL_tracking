@@ -15,7 +15,9 @@ class Test:
         done = False
         step = 1
         rewards = 0
-        while (x,y) != int_pos:
+        print("Test started")
+        print(done)
+        while not done:
 
             print(f"TRAINED AGENT")
             print("Step {}".format(step))
@@ -31,5 +33,5 @@ class Test:
             print(f"score: {rewards}")
             x, y = new_state
             step += 1
-            if x:
+            if done:
                 print(f"final state{x, y}")

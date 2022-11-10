@@ -33,8 +33,9 @@ class Train:
         self.optimizer = optimizer
         self.loss_fn = loss_fn
         self.env = env
-        self.replay_buffer = ReplayBuffer(1000, 2, self.action_size)
         self.batch_size = batch_size
+
+
 
         pass
 
@@ -52,6 +53,8 @@ class Train:
             print(episode)
             x, y = self.env.reset()
             done = False
+
+            self.replay_buffer = ReplayBuffer(100, 2, self.action_size)
 
             for step in range(max_steps):
 
@@ -75,7 +78,7 @@ class Train:
                     x, y = self.env.reset()
                     done = False
 
-                if self.replay_buffer.mem_cntr < self.batch_size:
+                if self.replay_buffer.mem_cntr < 100:   # self.batch_size:
                     continue
                 (
                     state,
@@ -105,6 +108,7 @@ class Train:
                 # Update to our new state
                 state = new_state
             self.epsilon = np.exp(-self.decay_rate * episode)
+
 
     def update_network_parameters(self):
 

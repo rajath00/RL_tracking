@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Custom import
-
+from plot import display
 # Datatype import
 from matplotlib.axes import Axes
 
@@ -108,17 +108,6 @@ class Q_Learning:
 
     def display(self):
 
-        Q = [[np.max(self.qtable[x, y, :]) for x in range(1, self.env.num_rows - 1)] for y in range(1, self.env.num_cols - 1)]
-        Q = np.reshape(Q, (self.env.num_rows - 2, self.env.num_cols - 2))
-        fig1, ax1 = plt.subplots(figsize=(10, 3))
-        self.plot_values(ax1, Q.T)
-        plt.show()
+        display(self.qtable,self.env.num_rows,self.env.num_cols)
 
-    def plot_values(self,ax: Axes, V: np.ndarray):
-        # reshape the state-value function
-        # plot the state-value function
-        im = ax.imshow(V, cmap='cool')
-        for (j, i), label in np.ndenumerate(V):
-            ax.text(i, j, np.round(label, 1), ha='center', va='center', fontsize=5)
-        ax.tick_params(bottom='off', left='off', labelbottom='off', labelleft='off')
 
