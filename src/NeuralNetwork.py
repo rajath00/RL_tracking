@@ -33,20 +33,3 @@ class NeuralNetwork(nn.Module):
         x = self.fcd4(F.relu(x))
 
         return x
-
-
-# class NeuralNetworkTarget(nn.Module):
-#
-#     def __init__(self):
-#             super().__init__()
-#
-#             self.fcd1 = nn.Linear(2, 10)
-#             self.fcd2 = nn.Linear(10, 4)
-#
-#     def forward(self, x, y):
-#
-#         x = torch.tensor((x, y))
-#         x = self.fcd1(x)
-#         x = self.fcd2(F.relu(x))
-#
-#         return x

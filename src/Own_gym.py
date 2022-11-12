@@ -6,7 +6,7 @@ from typing import Optional
 import numpy as np
 # Specific lib used
 from gym import Env, spaces, utils
-
+import math
 
 
 '''
@@ -75,6 +75,9 @@ class Own_gym(Env):
         self.observation_space = spaces.Discrete(self.num_states)
         self.state = (None)
         self.last_action = None
+        self.previous_distance = 0
+        self.current_distance = 0
+        self.time_step = 0
 
     # function for getting setting rewards for all the states
 
@@ -124,6 +127,8 @@ class Own_gym(Env):
     # function to return the next state, reward and termination criteria
     def step(self, a):
 
+        self.previous_distance = self.calculate_dist()
+        self.time_step+=0.1
         next_state = (0, 0)
         r = 0
         t = 0
@@ -140,20 +145,49 @@ class Own_gym(Env):
                 next_state = (x, y + 1)
 
         self.state = next_state
+        self.current_distance = self.calculate_dist()
         x = self.state[0]
         y = self.state[1]
         self.last_action = a
-        return self.state, self.P[x, y, 0], self.P[x, y, 1], False
+
+        reward = (self.previous_distance - self.current_distance) - (0.1*self.time_step)
+        # reward = 1/self.current_distance
+        
+        return self.state, reward, self.P[x, y, 1], False
 
     # function to reset the position
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None):
 
+        self.previous_distance = 0
+        self.current_distance = 0
+        self.time_step = 0
+
         # super().reset(seed=seed)
         # init_state = np.random.randint(1,self.num_rows-1, size=(1, 2))
 
-        init_state = [(1,1)]
+        init_state = [(5,5)]
         # print(init_state)
         self.state = init_state[0]
         self.last_action = None
 
         return self.state
+
+    def calculate_dist(self):
+        x = self.target_pos[0] - self.state[0]
+        y = self.target_pos[1] - self.state[1]
+        dist = math.sqrt(x**2 + y**2)
+        return dist
+
+    # def calculate_reward(self) -> float:
+    #
+    #
+    #     x = self.target_pos[0] - self.state[0]
+    #     y = self.target_pos[1] - self.state[1]
+    #     reward = math.sqrt(x**2 + y**2)
+    #
+    #     # print(f"state = {self.state}")
+    #     # print(f"target = {self.target_pos}")
+    #     # print(f"reward = {10/(reward + 0.001)}")
+    #
+    #     return -reward
+    #     # return 10/(reward + 0.001)

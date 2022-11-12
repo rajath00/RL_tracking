@@ -4,7 +4,7 @@ import random
 import numpy as np
 # Custom import
 from replay_buffer import ReplayBuffer
-
+import matplotlib.pyplot as plt
 
 class Train:
     def __init__(
@@ -19,13 +19,14 @@ class Train:
         epsilon,
         decay_rate,
         batch_size,
+        buffer_size,
         target_move=False,
     ):
         self.learning_rate = learning_rate
         self.discount_rate = discount_rate
         self.epsilon = epsilon
         self.decay_rate = decay_rate
-        self.target_move = False
+        self.target_move = target_move
         self.state_size = env.observation_space.n
         self.action_size = env.action_space.n
         self.model = model
@@ -34,28 +35,30 @@ class Train:
         self.loss_fn = loss_fn
         self.env = env
         self.batch_size = batch_size
+        self.buffer_size = buffer_size
 
-
-
-        pass
-
-    def training_loop(self):
-        pass
 
     def train(self, num_episodes, max_steps, int_pos):
 
         if not self.target_move:
             pos = int_pos
             self.env.target_position(pos)
+        self.model.train()
+        eps4plot = []
+        cumulative_ep_reward = []
+        avg_ep_loss = []
 
         for episode in range(num_episodes):
-
-            print(episode)
+            print(f"episode = {episode}")
+            # print(episode)
             x, y = self.env.reset()
             done = False
 
-            self.replay_buffer = ReplayBuffer(100, 2, self.action_size)
-
+            self.replay_buffer = ReplayBuffer(self.buffer_size, 2)
+            ep_reward = 0
+            ep_loss = 0
+            num_losses_in_ep = 0
+            self.target_model.load_state_dict(self.model.state_dict())
             for step in range(max_steps):
 
                 # exploration-exploitation tradeoff
@@ -69,7 +72,7 @@ class Train:
                     action = np.argmax(q_values.detach().numpy())
                 # take action and observe the reward
                 new_state, reward, done, truncated = self.env.step(action)
-
+                ep_reward += reward
                 self.replay_buffer.store_transition(
                     (x, y), action, reward, new_state, done
                 )
@@ -77,8 +80,8 @@ class Train:
                 if done:
                     x, y = self.env.reset()
                     done = False
-
-                if self.replay_buffer.mem_cntr < 100:   # self.batch_size:
+                state = new_state
+                if self.replay_buffer.mem_cntr < self.buffer_size:   # self.batch_size:
                     continue
                 (
                     state,
@@ -96,23 +99,39 @@ class Train:
                 target = mu.clone()
                 # target = np.zeros(np.shape(target_value_))
                 # print(target_value_[0])ss
+                action = action.astype(int)
                 for j in range(self.batch_size):
 
                     # arg_max = np.argmax(target_value_[j].detach().numpy())
                     a = action[j]
                     target[j,a] = reward[j] + self.discount_rate * np.max(target_value_[j].detach().numpy()) * (1-done[j])
 
+
                 loss = self.loss_fn(mu, target)
-                self.update_network_parameters()
+                ep_loss += float(loss)
+                num_losses_in_ep += 1
+
+                self.optimizer.zero_grad()
+                loss.backward()
+                self.optimizer.step()
+
+            if episode % 10 == 0:
+
+                self.target_model.load_state_dict(self.model.state_dict())
                 #
                 # Update to our new state
-                state = new_state
-            self.epsilon = np.exp(-self.decay_rate * episode)
+            eps4plot.append(self.epsilon)
 
-
-    def update_network_parameters(self):
-
-        model_params = self.model.named_parameters()
-        model_state_dict = dict(model_params)
-
-        self.target_model.load_state_dict(model_state_dict)
+            self.epsilon = -self.decay_rate * episode
+            cumulative_ep_reward.append(ep_reward)
+            avg_ep_loss.append(200 * ep_loss)
+        plt.figure()
+        plt.plot(range(len(eps4plot)), eps4plot)
+        plt.show()
+        return cumulative_ep_reward, avg_ep_loss
+    # def update_network_parameters(self):
+    #
+    #     model_params = self.model.named_parameters()
+    #     model_state_dict = dict(model_params)
+    #
+    #     self.target_model.load_state_dict(model_state_dict)
