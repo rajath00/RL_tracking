@@ -20,23 +20,24 @@ from plot import display
 # Datatype import
 
 LEARNING_RATE = 0.9
-DISCOUNT_RATE = 0.8
+DISCOUNT_RATE = 0.5
 EPSILON = 1
-DECAY_RATE = 0.99
+DECAY_RATE = 0.9
 TARGET_MOVE = False
-NO_ROWS = 25
-NO_COLS = 25
-INIT_POS = (10,10)  # define initial position of the target
-BATCH_SIZE = 20
-BUFFER_SIZE = 500
+NO_ROWS = 50
+NO_COLS = 50
+INIT_POS = (35,35)  # define initial position of the target
+BATCH_SIZE = 50
+BUFFER_SIZE = 2000
+
 
 Q_learning = False
 Deep_learning = True
 
 # create Taxi environment
 env = Own_gym(NO_ROWS, NO_COLS)
-num_episodes = 5000
-max_steps = 520  # per episode
+num_episodes = 1000
+max_steps = 2100  # per episode
 
 if Q_learning:
 
@@ -59,7 +60,7 @@ if Deep_learning:
     model = NeuralNetwork()
     target_model = NeuralNetwork()
     loss_fn = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.0001)
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
     train = Train(
         model,
         target_model,
@@ -89,6 +90,9 @@ if Deep_learning:
     display(qtable,NO_ROWS,NO_COLS)
 
     test = Test(model, env)
-    test.test(INIT_POS)
+    path = test.test(INIT_POS)
+    print(path)
+    plt.plot(path[:, 0], path[:, 1])
+    plt.show()
 
 env.close()

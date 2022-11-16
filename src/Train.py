@@ -1,10 +1,15 @@
 # System import XXX
+import math
 import random
 # External import
 import numpy as np
+import torch
+
 # Custom import
 from replay_buffer import ReplayBuffer
 import matplotlib.pyplot as plt
+import os
+
 
 class Train:
     def __init__(
@@ -54,6 +59,7 @@ class Train:
             x, y = self.env.reset()
             done = False
 
+            cnt = 1
             self.replay_buffer = ReplayBuffer(self.buffer_size, 2)
             ep_reward = 0
             ep_loss = 0
@@ -83,6 +89,9 @@ class Train:
                 state = new_state
                 if self.replay_buffer.mem_cntr < self.buffer_size:   # self.batch_size:
                     continue
+                if cnt == 1:
+                    print(state)
+                    cnt = 2
                 (
                     state,
                     action,
@@ -106,7 +115,6 @@ class Train:
                     a = action[j]
                     target[j,a] = reward[j] + self.discount_rate * np.max(target_value_[j].detach().numpy()) * (1-done[j])
 
-
                 loss = self.loss_fn(mu, target)
                 ep_loss += float(loss)
                 num_losses_in_ep += 1
@@ -118,11 +126,13 @@ class Train:
             if episode % 10 == 0:
 
                 self.target_model.load_state_dict(self.model.state_dict())
+                torch.save(self.model.state_dict(), os.getcwd() + "/model.pt")
+                self.epsilon = self.epsilon*self.decay_rate
                 #
                 # Update to our new state
             eps4plot.append(self.epsilon)
 
-            self.epsilon = -self.decay_rate * episode
+
             cumulative_ep_reward.append(ep_reward)
             avg_ep_loss.append(200 * ep_loss)
         plt.figure()

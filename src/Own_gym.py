@@ -94,24 +94,24 @@ class Own_gym(Env):
         free = np.zeros((self.num_rows, self.num_cols), dtype=bool)
         free[1:self.num_rows - 1, 1:self.num_cols - 1] = 1
 
-        self.P[:, :, 0][obstacles] = -5 # reward assignment
-        self.P[:, :, 0][free] = -0.5 # reward assignment
+        # self.P[:, :, 0][obstacles] = -5 # reward assignment
+        # self.P[:, :, 0][free] = -0.5 # reward assignment
         self.P[:, :, 1][obstacles] = 1  # termination
         self.P[:, :, 1][free] = 0  # termination
 
     # function to set the reward func around the target
     def target_position(self, new_pos):  # XXX what is target_pos? int or tuple? it should be tuple (x,y)
-        reward = 5  # XXX why 50
+        # reward = 5  # XXX why 50
         extend_mask = 1
         # self.P[extend_mask + self.target_pos[0]:self.target_pos[0] - extend_mask, extend_mask + self.target_pos[1]:self.target_pos[1] - extend_mask, 0] = -1
         # self.P[self.target_pos[0], self.target_pos[1], 1] = 0
 
         # self.P[extend_mask + new_pos[0]:new_pos[0] - extend_mask, extend_mask + new_pos[1]:new_pos[1] - extend_mask, 0] = reward
-        self.P[new_pos[0], new_pos[1], 0] = reward
-        self.P[new_pos[0], new_pos[1], 1] = 1
-
+        # self.P[new_pos[0], new_pos[1], 0] = reward
+        # self.P[new_pos[0], new_pos[1], 1] = 1
+        #
         self.target_pos = new_pos
-        print(self.target_pos)
+        # print(self.target_pos)
 
     def encode(self):
 
@@ -125,7 +125,7 @@ class Own_gym(Env):
         pass
 
     # function to return the next state, reward and termination criteria
-    def step(self, a):
+    def step(self, a, test=False):
 
         self.previous_distance = self.calculate_dist()
         self.time_step+=0.1
@@ -151,9 +151,16 @@ class Own_gym(Env):
         self.last_action = a
 
         reward = (self.previous_distance - self.current_distance) - (0.1*self.time_step)
+        termination = self.P[x, y, 1]
+        if test:
+            print(self.current_distance)
+        if self.current_distance <= 1:
+            print(self.current_distance)
+            reward = 10
+            termination = 1
         # reward = 1/self.current_distance
-        
-        return self.state, reward, self.P[x, y, 1], False
+
+        return self.state, reward, termination, False
 
     # function to reset the position
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None):

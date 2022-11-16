@@ -17,6 +17,8 @@ class Test:
         rewards = 0
         print("Test started")
         print(done)
+        path = np.array([x,y])
+        print(path)
         while not done:
 
             print(f"TRAINED AGENT")
@@ -27,11 +29,14 @@ class Test:
             action = np.argmax(q_values.detach().numpy())
             print(f"action = {action}")
             print(f"Q-value = {np.max(q_values.detach().numpy())}")
-            new_state, reward, done, truncated = self.env.step(action)
+            new_state, reward, done, truncated = self.env.step(action,True)
             print(done)
             rewards += reward
             print(f"score: {rewards}")
             x, y = new_state
+            new = np.array([x,y])
+            path = np.vstack((path,new))
             step += 1
-            if done:
+            if done or step>150:
                 print(f"final state{x, y}")
+                return path

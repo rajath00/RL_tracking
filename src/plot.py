@@ -19,3 +19,8 @@ def plot_values(ax: Axes, V: np.ndarray):
     for (j, i), label in np.ndenumerate(V):
         ax.text(i, j, np.round(label, 1), ha='center', va='center', fontsize=5)
     ax.tick_params(bottom='off', left='off', labelbottom='off', labelleft='off')
+
+
+def plot_final(ax:Axes, V: np.ndarray):
+
+    im = ax.imshow(V)
