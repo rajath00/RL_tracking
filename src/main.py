@@ -1,98 +1,99 @@
 # System import XXX
-import torch
-import torch.nn as nn
-import matplotlib.pyplot as plt
-import numpy as np
+import gym
+from stable_baselines3.common.vec_env import SubprocVecEnv
+from stable_baselines3 import DQN
+from stable_baselines3.common.env_util import make_vec_env
+
 # External import
 
-from torch import optim
-
-
-from NeuralNetwork import NeuralNetwork
-
 # Custom import
-from Own_gym import Own_gym
-from Q_Learning import Q_Learning
-from Train import Train
-from Test import Test
-from plot import display
+from Own_gym.rl_env.agent import Agent
+from Own_gym.rl_env.target import Target
+from Own_gym.rl_env.boundary import Boundary
+import random
 
 # Datatype import
 
-LEARNING_RATE = 0.9
-DISCOUNT_RATE = 0.5
-EPSILON = 1
-DECAY_RATE = 0.9
-TARGET_MOVE = False
-NO_ROWS = 50
-NO_COLS = 50
-INIT_POS = (35,35)  # define initial position of the target
-BATCH_SIZE = 50
-BUFFER_SIZE = 2000
+# LEARNING_RATE = 0.9
+# DISCOUNT_RATE = 0.5
+# EPSILON = 1
+# DECAY_RATE = 0.9
+# TARGET_MOVE = False
+# NO_ROWS = 50
+# NO_COLS = 50
+# INIT_POS = (35,35)  # define initial position of the target
+# BATCH_SIZE = 50
+# BUFFER_SIZE = 2000
 
 
-Q_learning = False
+# Q_learning = False
 Deep_learning = True
+#
+# # create Taxi environment
+# env = Own_gym(NO_ROWS, NO_COLS)
+# num_episodes = 1000
+# max_steps = 2100  # per episode
 
-# create Taxi environment
-env = Own_gym(NO_ROWS, NO_COLS)
-num_episodes = 1000
-max_steps = 2100  # per episode
+# if Q_learning:
+#
+#     learn = Q_Learning(
+#         env, LEARNING_RATE, DISCOUNT_RATE, EPSILON, DECAY_RATE, TARGET_MOVE
+#     )
+#     learn.train(num_episodes, max_steps, INIT_POS)
+#
+#     print(f"Training completed over {num_episodes} episodes")
+#     input("Press Enter to watch trained agent...")
+#
+#     learn.test(max_steps, INIT_POS)
+#
+#     print(f"Test completed")
+#     input("Press Enter to view the Q-table...")
+#     learn.display()
 
-if Q_learning:
+if __name__ == "__main__":
 
-    learn = Q_Learning(
-        env, LEARNING_RATE, DISCOUNT_RATE, EPSILON, DECAY_RATE, TARGET_MOVE
+    def env_components():
+
+        g = random.randint(-240, 240)
+        agent = Agent([250 + g, 250 + g])
+        h = random.randint(-100, 100)
+        target = Target([250 + h, 250 + h])
+        boundary = Boundary([0, 0, 500, 500])
+        return agent, target, boundary
+
+    env_name = "DeepRL-v0"
+    env_args = {"generate_env": env_components}
+
+    env = gym.make(env_name, **env_args)
+    vec_env = make_vec_env(
+        env_name, n_envs=4, seed=0, vec_env_cls=SubprocVecEnv, env_kwargs=env_args
     )
-    learn.train(num_episodes, max_steps, INIT_POS)
 
-    print(f"Training completed over {num_episodes} episodes")
-    input("Press Enter to watch trained agent...")
-
-    learn.test(max_steps, INIT_POS)
-
-    print(f"Test completed")
-    input("Press Enter to view the Q-table...")
-    learn.display()
-
-if Deep_learning:
-
-    model = NeuralNetwork()
-    target_model = NeuralNetwork()
-    loss_fn = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
-    train = Train(
-        model,
-        target_model,
-        optimizer,
-        loss_fn,
-        env,
-        LEARNING_RATE,
-        DISCOUNT_RATE,
-        EPSILON,
-        DECAY_RATE,
-        BATCH_SIZE,
-        BUFFER_SIZE,
-        TARGET_MOVE,
+    model = DQN(
+        "MultiInputPolicy",
+        vec_env,
+        gamma=0.98,
+        learning_starts=10000,
+        target_update_interval=2000,
+        exploration_fraction=0.5,
+        verbose=1,
+        policy_kwargs={"net_arch": [16, 16]},
     )
-    cum_ep_reward, avg_ep_loss = train.train(num_episodes, max_steps, INIT_POS)
+    model.learn(total_timesteps=500000, log_interval=4, progress_bar=True)
+    model.save("my_model")
 
-    plt.figure()
-    plt.plot(range(len(cum_ep_reward)), cum_ep_reward, label="Cumulative reward")
-
-    qtable = np.zeros((NO_COLS,NO_ROWS,4))
-    out = torch.zeros((4,1))
-    for i in range(NO_COLS):
-        for j in range(NO_ROWS):
-            out=model.forward((i,j))
-            qtable[i, j, :] = out.detach().numpy()
-
-    display(qtable,NO_ROWS,NO_COLS)
-
-    test = Test(model, env)
-    path = test.test(INIT_POS)
-    print(path)
-    plt.plot(path[:, 0], path[:, 1])
-    plt.show()
-
-env.close()
+    model = DQN.load("my_model", env=vec_env)
+    cont = True
+    while cont:
+        obs = env.reset()
+        cumulative_reward = 0
+        for i in range(0, 1000):
+            print(obs)
+            action, _states = model.predict(obs, deterministic=True)
+            obs, reward, done, info = env.step(action)
+            cumulative_reward+=reward
+            print(f"reward = {reward}, cumilative_reward = {cumulative_reward}")
+            env.render()
+            if done:
+                # cont = False
+                break
