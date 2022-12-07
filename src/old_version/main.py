@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
 import numpy as np
+
 # External import
 
 from torch import optim
@@ -11,7 +12,7 @@ from torch import optim
 from NeuralNetwork import NeuralNetwork
 
 # Custom import
-from Own_gym import Own_gym
+from Components import Own_gym
 from Q_Learning import Q_Learning
 from Train import Train
 from Test import Test
@@ -26,7 +27,7 @@ DECAY_RATE = 0.9
 TARGET_MOVE = False
 NO_ROWS = 50
 NO_COLS = 50
-INIT_POS = (35,35)  # define initial position of the target
+INIT_POS = (35, 35)  # define initial position of the target
 BATCH_SIZE = 50
 BUFFER_SIZE = 2000
 
@@ -80,14 +81,14 @@ if Deep_learning:
     plt.figure()
     plt.plot(range(len(cum_ep_reward)), cum_ep_reward, label="Cumulative reward")
 
-    qtable = np.zeros((NO_COLS,NO_ROWS,4))
-    out = torch.zeros((4,1))
+    qtable = np.zeros((NO_COLS, NO_ROWS, 4))
+    out = torch.zeros((4, 1))
     for i in range(NO_COLS):
         for j in range(NO_ROWS):
-            out=model.forward((i,j))
+            out = model.forward((i, j))
             qtable[i, j, :] = out.detach().numpy()
 
-    display(qtable,NO_ROWS,NO_COLS)
+    display(qtable, NO_ROWS, NO_COLS)
 
     test = Test(model, env)
     path = test.test(INIT_POS)

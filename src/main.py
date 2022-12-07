@@ -7,10 +7,12 @@ from stable_baselines3.common.env_util import make_vec_env
 # External import
 
 # Custom import
-from Own_gym.rl_env.agent import Agent
-from Own_gym.rl_env.target import Target
-from Own_gym.rl_env.boundary import Boundary
+from Components.rl_env.agent import Agent
+from Components.rl_env.target import Target
+
+# from Own_gym.rl_env.boundary import Boundary
 import random
+from Components.rl_env.Obstacle import Obstacle, Boundary
 
 # Datatype import
 
@@ -54,12 +56,16 @@ if __name__ == "__main__":
 
     def env_components():
 
-        g = random.randint(-240, 240)
-        agent = Agent([250 + g, 250 + g])
-        h = random.randint(-100, 100)
-        target = Target([250 + h, 250 + h])
-        boundary = Boundary([0, 0, 500, 500])
-        return agent, target, boundary
+        # g = random.randint(-240, 240)
+        # agent = Agent([250 + g, 250 + g])
+        # h = random.randint(-100, 100)
+        # target = Target([250 + h, 250 + h])
+        # boundary = Boundary([0, 0, 500, 500])
+        agent = Agent((100, 100))
+        obstacle = Obstacle([(250, 250), (250, 350), (350, 350), (350, 250)])
+        boundary = Boundary([(0, 0), (0, 500), (500, 500), (500, 0)])
+        target = Target([250, 250])
+        return agent, target, boundary, obstacle
 
     env_name = "DeepRL-v0"
     env_args = {"generate_env": env_components}
@@ -69,18 +75,18 @@ if __name__ == "__main__":
         env_name, n_envs=4, seed=0, vec_env_cls=SubprocVecEnv, env_kwargs=env_args
     )
 
-    model = DQN(
-        "MultiInputPolicy",
-        vec_env,
-        gamma=0.98,
-        learning_starts=10000,
-        target_update_interval=2000,
-        exploration_fraction=0.5,
-        verbose=1,
-        policy_kwargs={"net_arch": [16, 16]},
-    )
-    model.learn(total_timesteps=500000, log_interval=4, progress_bar=True)
-    model.save("my_model")
+    # model = DQN(
+    #     "MultiInputPolicy",
+    #     vec_env,
+    #     gamma=0.98,
+    #     learning_starts=10000,
+    #     target_update_interval=2000,
+    #     exploration_fraction=0.5,
+    #     verbose=1,
+    #     policy_kwargs={"net_arch": [16, 16]},
+    # )
+    # model.learn(total_timesteps=500000, log_interval=4, progress_bar=True)
+    # model.save("my_model")
 
     model = DQN.load("my_model", env=vec_env)
     cont = True
@@ -91,7 +97,7 @@ if __name__ == "__main__":
             print(obs)
             action, _states = model.predict(obs, deterministic=True)
             obs, reward, done, info = env.step(action)
-            cumulative_reward+=reward
+            cumulative_reward += reward
             print(f"reward = {reward}, cumilative_reward = {cumulative_reward}")
             env.render()
             if done:

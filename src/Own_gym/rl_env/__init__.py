@@ -1,1 +1,0 @@
-from Own_gym.rl_env.environment import Own_gym
