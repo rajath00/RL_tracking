@@ -53,13 +53,13 @@ class Own_gym(gym.Env):
                 )
             }
         )
-        self.time_step = 0.01
+        self.time_step = 1
         self.run_time = 0
 
     # function to reset the position
     def reset(self, seed=None, options=None) -> dict:
         # super().reset(seed=seed)
-
+        self.run_time = 0
         self.last_render_at = 0
         self.previous_distance = 0
         self.current_distance = 0
@@ -127,9 +127,9 @@ class Own_gym(gym.Env):
         self.last_render_at = time()
         fps = 1 / dt
 
-        plot.obstacles(self.ax,self.obstacle)
+        plot.obstacles(self.ax, self.obstacle)
         plot.boundary(self.ax, self.boundary)
-        plot.line(self.ax,self.traversed_positions)
+        plot.line(self.ax, self.traversed_positions)
         # minimum, maximum = self.boundary.get_obs()
         # rect1 = patches.Rectangle(
         #     (minimum[0], minimum[1]),

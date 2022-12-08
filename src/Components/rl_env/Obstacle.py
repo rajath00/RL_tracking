@@ -32,6 +32,7 @@ class Obstacle:
         # self.polygon = Polygon(self.corners)
 
     def collision(self, agent) -> bool:
+        # print(agent.point)
         return self.polygon.contains(agent.point)
 
 

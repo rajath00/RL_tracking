@@ -64,7 +64,7 @@ if __name__ == "__main__":
         agent = Agent((100, 100))
         obstacle = Obstacle([(250, 250), (250, 350), (350, 350), (350, 250)])
         boundary = Boundary([(0, 0), (0, 500), (500, 500), (500, 0)])
-        target = Target([250, 250])
+        target = Target([250, 400])
         return agent, target, boundary, obstacle
 
     env_name = "DeepRL-v0"
@@ -75,18 +75,18 @@ if __name__ == "__main__":
         env_name, n_envs=4, seed=0, vec_env_cls=SubprocVecEnv, env_kwargs=env_args
     )
 
-    # model = DQN(
-    #     "MultiInputPolicy",
-    #     vec_env,
-    #     gamma=0.98,
-    #     learning_starts=10000,
-    #     target_update_interval=2000,
-    #     exploration_fraction=0.5,
-    #     verbose=1,
-    #     policy_kwargs={"net_arch": [16, 16]},
-    # )
-    # model.learn(total_timesteps=500000, log_interval=4, progress_bar=True)
-    # model.save("my_model")
+    model = DQN(
+        "MultiInputPolicy",
+        vec_env,
+        gamma=0.98,
+        learning_starts=10000,
+        target_update_interval=2000,
+        exploration_fraction=0.5,
+        verbose=1,
+        policy_kwargs={"net_arch": [16, 16]},
+    )
+    model.learn(total_timesteps=500000, log_interval=4, progress_bar=True)
+    model.save("my_model")
 
     model = DQN.load("my_model", env=vec_env)
     cont = True

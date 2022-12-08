@@ -49,21 +49,27 @@ class Agent:
         if action == 0:
             self.angle = time_step * Agent.MIN_ANG_VEL
             pos = time_step * Agent.MAX_VEL
+            self.speed = Agent.MAX_VEL
 
         elif action == 1:
             self.angle = time_step * Agent.MAX_ANG_VEL
             pos = time_step * Agent.MAX_VEL
+            self.speed = Agent.MAX_VEL
 
         elif action == 2:
             self.angle = time_step * 0
             pos = time_step * Agent.MAX_VEL
+            self.speed = Agent.MIN_VEL
 
         elif action == 3:
             self.angle = time_step * 0
             pos = time_step * Agent.MIN_VEL
+            self.speed = Agent.MIN_VEL
 
         self.position[0] += (pos) * cos(self.angle)
         self.position[1] += (pos) * sin(self.angle)
+        self._point = Point(self.position)
+        # print(self.position)
 
     def get_obs(self):
         return self.position[0], self.position[1], self.angle, self.speed
